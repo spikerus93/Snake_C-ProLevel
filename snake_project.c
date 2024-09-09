@@ -48,16 +48,6 @@ enum
     CONTROLS = 3
 };
 
-struct control_buttons
-{
-    int left, right, up, down;
-} controls_buttons;
-
-struct control_buttons default_controls[CONTROLS] =
-    {{LEFT, RIGHT, UP, DOWN},
-     {'a', 'd', 'w', 's'},
-     {'A', 'D', 'W', 'S'}};
-
 typedef struct tail_t
 {
     int x, y;
@@ -69,7 +59,6 @@ typedef struct snake_t
     int direction;
     struct tail_t *tail;
     size_t tsize;
-    struct control_buttons *controls;
 } snake_t;
 
 _Bool GameOver = FALSE;
@@ -82,8 +71,7 @@ init_Snake(int x, int y, size_t tsize)
     snake.y = y;
     snake.tsize = tsize;
     snake.tail = (tail_t *)malloc(sizeof(tail_t) * 100);
-    snake.controls = default_controls;
-    snake.direction = LEFT;
+    snake.direction = 1;
 
     for (int i = 0; i < (int)tsize; i++)
     {
@@ -115,72 +103,56 @@ void print_Snake(struct snake_t snake)
     }
 }
 
-int changeDirection(struct snake_t snake, const int32_t key)
+void input(snake_t *snake)
 {
-    if (key == 'a' || key == 'A')
+    if (_kbhit())
     {
-        if (snake.controls->left != 0)
-            snake.controls->left = 0;
-        else
-            snake.controls->left = 1;
+        switch (_getch())
+        {
+        case 'a':
+        case 'A':
+            snake->direction = LEFT; // Движение влево
+            break;
+        case 'd':
+        case 'D':
+            snake->direction = RIGHT; // Движение вправо
+            break;
+        case 'w':
+        case 'W':
+            snake->direction = UP; // Движение вверх
+            break;
+        case 's':
+        case 'S':
+            snake->direction = DOWN; // Движение вниз
+            break;
+        case 'q':
+        case 'Q':
+            printf("You are out of the game! \2\n");
+            exit(EXIT_SUCCESS);
+            break;
+        }
     }
-
-    if (key == 'd' || key == 'D')
-    {
-        if (snake.controls->right != 0)
-            snake.controls->right = 0;
-        else
-            snake.controls->right = 1;
-    }
-
-    if (key == 'w' || key == 'W')
-    {
-        if (snake.controls->up != 0)
-            snake.controls->up = 0;
-        else
-            snake.controls->up = 1;
-    }
-
-    if (key == 's' || key == 'S')
-    {
-        if (snake.controls->down != 0)
-            snake.controls->down = 0;
-        else
-            snake.controls->down = 1;
-    }
-    return key;
 }
 
-int get_direction(snake_t snake)
+int checkDirection(struct snake_t snake, const int32_t key)
 {
-    int current_direction = snake.direction;
-
-    if (snake.controls->left == 1)
+    if ((key == 'a' || key == 'A') && snake.direction != LEFT)
     {
-        current_direction = LEFT;
-        return TRUE;
+        snake.direction = LEFT;
     }
-
-    else if (snake.controls->right == 1)
+    else if ((key == 'd' || key == 'D') && snake.direction != RIGHT)
     {
-        current_direction = RIGHT;
-        return TRUE;
+        snake.direction = RIGHT;
     }
-
-    else if (snake.controls->up == 1)
+    else if ((key == 'w' || key == 'W') && snake.direction != UP)
     {
-        current_direction = UP;
-        return TRUE;
+        snake.direction = UP;
     }
-
-    else if (snake.controls->down == 1)
+    else if ((key == 's' || key == 'S') && snake.direction != DOWN)
     {
-        current_direction = DOWN;
-        return TRUE;
+        snake.direction = DOWN;
     }
-    else
-        return FALSE;
-    return current_direction;
+    return key;
 }
 
 _Bool isSnakeInTail(snake_t snake)
@@ -193,7 +165,7 @@ _Bool isSnakeInTail(snake_t snake)
     return 0;
 }
 
-snake_t move_Snake(snake_t snake, const int32_t key)
+snake_t move_Snake(snake_t snake)
 {
 
     for (int i = snake.tsize - 1; i > 0; i--)
@@ -209,67 +181,38 @@ snake_t move_Snake(snake_t snake, const int32_t key)
     if (snake.y < 0)
         snake.x = MAX_Y - 1;
 
-    if (_kbhit())
-    {
-        snake.direction = getch();
-        switch (key)
-        {
-        case LEFT:
-            --snake.x;
-            break;
-        case RIGHT:
-            ++snake.x;
-            break;
-        case UP:
-            --snake.y;
-            break;
-        case DOWN:
-            ++snake.y;
-            break;
-        }
-    }
+    if (snake.direction == LEFT)
+        --snake.x;
+    else if (snake.direction == RIGHT)
+        ++snake.x;
+    else if (snake.direction == UP)
+        --snake.y;
+    else if (snake.direction == DOWN)
+        ++snake.y;
+
     return snake;
 }
 
 int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 3);
+    char key = snake.direction;
 
     while (!GameOver)
     {
-        char key = _getch();
-
-        if ((key == 'a' || key == 'A') && snake.direction != LEFT)
-        {
-            snake.direction = LEFT;
-        }
-        else if ((key == 'd' || key == 'D') && snake.direction != RIGHT)
-        {
-            snake.direction = RIGHT;
-        }
-        else if ((key == 'w' || key == 'W') && snake.direction != UP)
-        {
-            snake.direction = UP;
-        }
-        else if ((key == 's' || key == 'S') && snake.direction != DOWN)
-        {
-            snake.direction = DOWN;
-        }
-
-        snake = move_Snake(snake, key);
-        changeDirection(snake, key);
-        get_direction(snake);
-
+        input(&snake);
+        snake = move_Snake(snake);
+        checkDirection(snake, key);
         system("cls");
         print_Snake(snake);
         sleep(1);
 
         if (isSnakeInTail(snake))
         {
+            printf("You ate a tail))) Try again now.");
             GameOver = TRUE;
         }
     }
-
     free(snake.tail);
 
     return 0;
