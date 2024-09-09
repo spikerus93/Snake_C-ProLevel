@@ -20,10 +20,7 @@ W, w Вверх
 S, s Вниз
 A, a Влево
 D, d Вправо
-Для решения предлагается сделать массив кодов управления struct control_buttons
-default_controls[CONTROLS]. CONTROLS – определяем количество элементов массива.
-В необходимых функциях в цикле необходимо сравнивать с каждым типом управления в цикле
-for (int i = 0; i < CONTROLS; i++)
+
 */
 
 #include <stdio.h>
@@ -33,10 +30,18 @@ for (int i = 0; i < CONTROLS; i++)
 #include <unistd.h>
 #include <windows.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define MAX_X 15
 #define MAX_Y 15
 #define MIN_Y 2
+
+#define SEED_NUMBER 5
+#define MAX_FOOD_SIZE 20
+#define FOOD_EXPIRE_SECONDS 10
+
+#define START_TAIL_SIZE 3
+#define MAX_TAIL_SIZE 20
 
 enum
 {
@@ -53,13 +58,31 @@ typedef struct tail_t
     int x, y;
 } tail_t;
 
+typedef struct food_t
+{
+    int x, y;
+    time_t put_time;
+    char point;
+    uint8_t enable;
+} food_t;
+
 typedef struct snake_t
 {
     int x, y;
     int direction;
+    food_t food;
+    bool has_eaten;
     struct tail_t *tail;
     size_t tsize;
 } snake_t;
+
+struct food
+{
+    int x, y;
+    time_t put_time;
+    char point;
+    uint8_t enable;
+} food[MAX_FOOD_SIZE];
 
 _Bool GameOver = FALSE;
 
@@ -79,6 +102,18 @@ init_Snake(int x, int y, size_t tsize)
         snake.tail[i].y = y;
     }
     return snake;
+}
+
+void init_Food(struct food f[], size_t size)
+{
+    struct food init = {0, 0, 0, 0, 0};
+
+    srand((unsigned int)time(NULL));
+
+    for (size_t i = 0; i < size; i++)
+    {
+        f[i] = init;
+    }
 }
 
 void print_Snake(struct snake_t snake)
@@ -101,6 +136,77 @@ void print_Snake(struct snake_t snake)
         }
         printf("\n");
     }
+}
+
+bool isInsideField(int x, int y)
+{
+    return x >= 0 && x < MAX_X - 1 && y >= 0 && y < MAX_Y - 1;
+}
+
+void generateFood(struct food f[])
+{
+    food->point = '$';
+
+    for (size_t i = 0; i < SEED_NUMBER; i++)
+    {
+        f[i].x = rand() % (MAX_X - 2);
+        f[i].y = rand() % (MAX_Y - 2) + 1;
+
+        if (isInsideField(f[i].x, f[i].y))
+        {
+            printf("%c", food->point);
+        }
+    }
+}
+
+void refresh_Food(struct food f[], int nfood)
+{
+    for (size_t i = 0; (int)i < nfood; i++)
+    {
+        if (f[i].put_time)
+        {
+            if (!f[i].enable || (time(NULL) - f[i].put_time) > FOOD_EXPIRE_SECONDS)
+            {
+                generateFood(&f[i]);
+            }
+        }
+    }
+}
+
+bool has_eaten(snake_t snake, struct food f[])
+{
+    for (size_t i = 0; i < MAX_FOOD_SIZE; i++)
+    {
+        if (f[i].enable == snake.x && snake.y == f[i].y)
+        {
+            f[i].enable = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void addTail(snake_t *snake)
+{
+    if (snake->x == NULL || snake->tsize > MAX_TAIL_SIZE)
+    {
+        printf("You can't add the tail");
+        return;
+    }
+
+    if (snake->has_eaten)
+    {
+        snake->tsize++;
+        snake->has_eaten = false;
+    }
+}
+
+void updateScreen(snake_t snake)
+{
+    system("cls");
+    print_Snake(snake);
+    generateFood(&food);
+    refresh_Food(food, SEED_NUMBER);
 }
 
 void input(snake_t *snake)
@@ -196,6 +302,8 @@ snake_t move_Snake(snake_t snake)
 int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 3);
+    memset(&food, 0, sizeof(food_t));
+
     char key = snake.direction;
 
     while (!GameOver)
@@ -203,9 +311,11 @@ int main(void)
         input(&snake);
         snake = move_Snake(snake);
         checkDirection(snake, key);
-        system("cls");
-        print_Snake(snake);
+        updateScreen(snake);
         sleep(1);
+
+        if (has_eaten(snake, &food))
+            addTail(&snake);
 
         if (isSnakeInTail(snake))
         {
