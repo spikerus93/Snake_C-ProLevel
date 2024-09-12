@@ -111,18 +111,26 @@ void input(snake_t *snake)
         {
         case 'a':
         case 'A':
+            if (snake->direction == RIGHT)
+                break;
             snake->direction = LEFT; // Движение влево
             break;
         case 'd':
         case 'D':
+            if (snake->direction == LEFT)
+                break;
             snake->direction = RIGHT; // Движение вправо
             break;
         case 'w':
         case 'W':
+            if (snake->direction == DOWN)
+                break;
             snake->direction = UP; // Движение вверх
             break;
         case 's':
         case 'S':
+            if (snake->direction == UP)
+                break;
             snake->direction = DOWN; // Движение вниз
             break;
         case 'q':
@@ -136,7 +144,7 @@ void input(snake_t *snake)
 
 _Bool isSnakeInTail(snake_t snake)
 {
-    for (size_t i = 1; i < snake.tsize; i++)
+    for (size_t i = 0; i < snake.tsize; i++)
     {
         if (snake.x == snake.tail[i].x || snake.y == snake.tail[i].y)
             return 0;
