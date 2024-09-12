@@ -57,10 +57,6 @@ typedef struct snake_t
 {
     int x, y;
     int direction;
-    bool left_pressed;
-    bool right_pressed;
-    bool up_pressed;
-    bool down_pressed;
     struct tail_t *tail;
     size_t tsize;
 } snake_t;
