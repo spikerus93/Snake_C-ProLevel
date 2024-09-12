@@ -57,6 +57,10 @@ typedef struct snake_t
 {
     int x, y;
     int direction;
+    bool left_pressed;
+    bool right_pressed;
+    bool up_pressed;
+    bool down_pressed;
     struct tail_t *tail;
     size_t tsize;
 } snake_t;
@@ -134,35 +138,26 @@ void input(snake_t *snake)
     }
 }
 
-int checkDirection(struct snake_t snake, const int32_t key)
-{
-    if ((key == 'a' || key == 'A') && snake.direction != LEFT)
-    {
-        snake.direction = LEFT;
-    }
-    else if ((key == 'd' || key == 'D') && snake.direction != RIGHT)
-    {
-        snake.direction = RIGHT;
-    }
-    else if ((key == 'w' || key == 'W') && snake.direction != UP)
-    {
-        snake.direction = UP;
-    }
-    else if ((key == 's' || key == 'S') && snake.direction != DOWN)
-    {
-        snake.direction = DOWN;
-    }
-    return key;
-}
-
 _Bool isSnakeInTail(snake_t snake)
 {
     for (size_t i = 1; i < snake.tsize; i++)
     {
-        if (snake.x == snake.tail[i].x && snake.y == snake.tail[i].y)
-            return 1;
+        if (snake.x == snake.tail[i].x || snake.y == snake.tail[i].y)
+            return 0;
     }
-    return 0;
+    return 1;
+}
+
+int checkDirection(snake_t *snake, const int32_t key)
+{
+    if ((snake->direction == LEFT && (key == 'd' || key == 'D')) ||
+        (snake->direction == RIGHT && (key == 'a' || key == 'A')) ||
+        (snake->direction == UP && (key == 's' || key == 'S')) ||
+        (snake->direction == DOWN && (key == 'w' || key == 'W')))
+    {
+        return 0;
+    }
+    return 1;
 }
 
 snake_t move_Snake(snake_t snake)
@@ -196,17 +191,23 @@ snake_t move_Snake(snake_t snake)
 int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 3);
-    char key = snake.direction;
+    int key = snake.direction;
 
     while (!GameOver)
     {
         input(&snake);
-        snake = move_Snake(snake);
-        checkDirection(snake, key);
-        system("cls");
-        print_Snake(snake);
-        sleep(1);
 
+        snake = move_Snake(snake);
+        if (checkDirection(&snake, key) == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            system("cls");
+            print_Snake(snake);
+            sleep(1);
+        }
         if (isSnakeInTail(snake))
         {
             printf("You ate a tail))) Try again now.");
