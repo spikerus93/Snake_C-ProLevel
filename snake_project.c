@@ -210,7 +210,9 @@ void updateScreen(snake_t snake)
 {
     system("cls");
     print_Snake(snake);
-    generateFood(&food);
+
+    if (isInsideField(snake.x, snake.y))
+        generateFood(&food);
     refresh_Food(food, SEED_NUMBER);
 }
 
