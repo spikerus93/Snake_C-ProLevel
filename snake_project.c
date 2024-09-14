@@ -66,9 +66,7 @@ typedef struct tail_t
 typedef struct food_t
 {
     int x, y;
-    time_t put_time;
-    char point;
-    uint8_t enable;
+    int hasEaten;
 } food_t;
 
 typedef struct snake_t
@@ -76,18 +74,9 @@ typedef struct snake_t
     int x, y;
     int direction;
     food_t food;
-    bool has_eaten;
     struct tail_t *tail;
     size_t tsize;
 } snake_t;
-
-struct food
-{
-    int x, y;
-    time_t put_time;
-    char point;
-    uint8_t enable;
-} food[MAX_FOOD_SIZE];
 
 _Bool GameOver = FALSE;
 
@@ -98,7 +87,7 @@ init_Snake(int x, int y, size_t tsize)
     snake.x = x;
     snake.y = y;
     snake.tsize = tsize;
-    snake.tail = (tail_t *)malloc(sizeof(tail_t) * 100);
+    snake.tail = (tail_t *)malloc(sizeof(tail_t) * 100 * MAX_TAIL_SIZE);
     snake.direction = 1;
 
     for (int i = 0; i < (int)tsize; i++)
@@ -109,25 +98,24 @@ init_Snake(int x, int y, size_t tsize)
     return snake;
 }
 
-void init_Food(struct food f[], size_t size)
+food_t init_Food()
 {
-    struct food init = {0, 0, 0, 0, 0};
-
-    srand((unsigned int)time(NULL));
-
-    for (size_t i = 0; i < size; i++)
-    {
-        f[i] = init;
-    }
+    food_t food;
+    food.x = rand() % MAX_X;
+    food.y = rand() % MAX_Y;
+    food.hasEaten = 0;
+    return food;
 }
 
-void print_Snake(struct snake_t snake)
+void print_Snake(struct snake_t snake, struct food_t food)
 {
     char matrix[MAX_X][MAX_Y];
 
     for (int i = 0; i < MAX_X; ++i)
         for (int j = 0; j < MAX_Y; ++j)
             matrix[i][j] = ' ';
+
+    matrix[food.x][food.y] = '$';
     matrix[snake.x][snake.y] = '@';
 
     for (int i = 0; i < (int)snake.tsize; ++i)
@@ -146,74 +134,6 @@ void print_Snake(struct snake_t snake)
 bool isInsideField(int x, int y)
 {
     return x >= 0 && x < MAX_X - 1 && y >= 0 && y < MAX_Y - 1;
-}
-
-void generateFood(struct food f[])
-{
-    food->point = '$';
-
-    for (size_t i = 0; i < SEED_NUMBER; i++)
-    {
-        f[i].x = rand() % (MAX_X - 2);
-        f[i].y = rand() % (MAX_Y - 2) + 1;
-
-        if (isInsideField(f[i].x, f[i].y))
-        {
-            printf("%c", food->point);
-        }
-    }
-}
-
-void refresh_Food(struct food f[], int nfood)
-{
-    for (size_t i = 0; (int)i < nfood; i++)
-    {
-        if (f[i].put_time)
-        {
-            if (!f[i].enable || (time(NULL) - f[i].put_time) > FOOD_EXPIRE_SECONDS)
-            {
-                generateFood(&f[i]);
-            }
-        }
-    }
-}
-
-bool has_eaten(snake_t snake, struct food f[])
-{
-    for (size_t i = 0; i < MAX_FOOD_SIZE; i++)
-    {
-        if (f[i].enable == snake.x && snake.y == f[i].y)
-        {
-            f[i].enable = 0;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-void addTail(snake_t *snake)
-{
-    if (snake->x == NULL || snake->tsize > MAX_TAIL_SIZE)
-    {
-        printf("You can't add the tail");
-        return;
-    }
-
-    if (snake->has_eaten)
-    {
-        snake->tsize++;
-        snake->has_eaten = false;
-    }
-}
-
-void updateScreen(snake_t snake)
-{
-    system("cls");
-    print_Snake(snake);
-
-    if (isInsideField(snake.x, snake.y))
-        generateFood(&food);
-    refresh_Food(food, SEED_NUMBER);
 }
 
 void input(snake_t *snake)
@@ -278,7 +198,7 @@ _Bool isSnakeInTail(snake_t snake)
     return 0;
 }
 
-snake_t move_Snake(snake_t snake)
+snake_t movetoEat_Snake(snake_t snake, food_t *food)
 {
 
     for (int i = snake.tsize - 1; i > 0; i--)
@@ -303,32 +223,39 @@ snake_t move_Snake(snake_t snake)
     else if (snake.direction == DOWN)
         ++snake.y;
 
+    if (snake.x == food->x && snake.y == food->y)
+    {
+        food->hasEaten = 1;
+        snake.tsize++;
+    }
     return snake;
 }
 
 int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 3);
-    memset(&food, 0, sizeof(food_t));
+    food_t food = init_Food();
+    print_Snake(snake, food);
 
     char key = snake.direction;
 
     while (!GameOver)
     {
         input(&snake);
-        snake = move_Snake(snake);
+        snake = movetoEat_Snake(snake, &food);
         checkDirection(snake, key);
-        updateScreen(snake);
-        sleep(1);
 
-        if (has_eaten(snake, &food))
-            addTail(&snake);
+        if (food.hasEaten)
+            food = init_Food();
 
         if (isSnakeInTail(snake))
         {
             printf("You ate a tail))) Try again now.");
             GameOver = TRUE;
         }
+        sleep(1);
+        system("cls");
+        print_Snake(snake, food);
     }
     free(snake.tail);
 
