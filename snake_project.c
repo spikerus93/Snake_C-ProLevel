@@ -41,12 +41,12 @@ D, d Вправо
 #define MAX_Y 15
 #define MIN_Y 2
 
-#define SEED_NUMBER 5
-#define MAX_FOOD_SIZE 20
-#define FOOD_EXPIRE_SECONDS 10
+#define START_TAIL_SIZE 2
+#define MAX_TAIL_SIZE 100
 
-#define START_TAIL_SIZE 3
-#define MAX_TAIL_SIZE 20
+#define DELAY 100
+#define PAUSE 1000
+#define SPEED_UP 100
 
 enum
 {
@@ -76,6 +76,8 @@ typedef struct snake_t
     food_t food;
     struct tail_t *tail;
     size_t tsize;
+    int level;
+    int speed;
 } snake_t;
 
 _Bool GameOver = FALSE;
@@ -89,6 +91,8 @@ init_Snake(int x, int y, size_t tsize)
     snake.tsize = tsize;
     snake.tail = (tail_t *)malloc(sizeof(tail_t) * 100 * MAX_TAIL_SIZE);
     snake.direction = 1;
+    snake.level = 1;
+    snake.speed = DELAY;
 
     for (int i = 0; i < (int)tsize; i++)
     {
@@ -105,6 +109,41 @@ food_t init_Food()
     food.y = rand() % MAX_Y;
     food.hasEaten = 0;
     return food;
+}
+
+void speedUp(snake_t *snake)
+{
+    snake->speed += SPEED_UP;
+}
+
+void printLevel(snake_t *snake)
+{
+    printf("Level: %d\n", snake->level);
+}
+
+void printExit(snake_t *snake)
+{
+    printf("Game Over!\n");
+    printf("Final Level: %d\n", snake->level);
+}
+
+void delayGame(int ms)
+{
+    int startTime = clock();
+    while ((clock() - startTime) < ms)
+        ;
+}
+
+void pause()
+{
+    int ch;
+
+    do
+    {
+        ch = _getch();
+    } while (ch != 'p' && ch != 'P');
+    printf("PAUSE\n");
+    delayGame(PAUSE);
 }
 
 void print_Snake(struct snake_t snake, struct food_t food)
@@ -168,8 +207,12 @@ void input(snake_t *snake)
             break;
         case 'q':
         case 'Q':
-            printf("You are out of the game! \2\n");
+            printExit(snake);
             exit(EXIT_SUCCESS);
+            break;
+        case 'p':
+        case 'P':
+            pause();
             break;
         }
     }
@@ -226,13 +269,16 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
     {
         food->hasEaten = 1;
         snake.tsize++;
+        speedUp(&snake);
+        snake.level++;
+        printLevel(&snake);
     }
     return snake;
 }
 
 int main(void)
 {
-    struct snake_t snake = init_Snake(10, 5, 3);
+    struct snake_t snake = init_Snake(10, 5, 2);
     food_t food = init_Food();
     print_Snake(snake, food);
 
@@ -261,6 +307,7 @@ int main(void)
         sleep(1);
         system("cls");
         print_Snake(snake, food);
+        delayGame(snake.speed);
     }
     free(snake.tail);
 
