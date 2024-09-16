@@ -46,7 +46,7 @@ D, d Вправо
 
 #define DELAY 100
 #define PAUSE 1000
-#define SPEED_UP 100
+#define SPEED_UP 5
 
 enum
 {
@@ -113,7 +113,7 @@ food_t init_Food()
 
 void speedUp(snake_t *snake)
 {
-    snake->speed += SPEED_UP;
+    snake->speed -= SPEED_UP;
 }
 
 void printLevel(snake_t *snake)
@@ -253,6 +253,9 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
     if (snake.x < 0)
         snake.x = MAX_X - 1;
 
+    if (snake.x == MAX_X)
+        snake.x = 0;
+
     if (snake.y < 0)
         snake.x = MAX_Y - 1;
 
@@ -299,12 +302,15 @@ int main(void)
             if (food.hasEaten)
                 food = init_Food();
         }
+
         if (isSnakeInTail(snake))
         {
             printf("You ate a tail))) Try again now.");
             GameOver = TRUE;
+            break;
         }
-        sleep(1);
+
+        sleep(0.9);
         system("cls");
         print_Snake(snake, food);
         delayGame(snake.speed);
