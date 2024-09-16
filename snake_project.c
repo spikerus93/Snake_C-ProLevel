@@ -26,6 +26,10 @@ D, d Вправо
 Добавляем в программу структуру еды struct food.
 Обновление еды - refreshFood
 
+Добавление цвета
+Задача 1. Цвет змеек
+Домашнее задание
+Добавить цвет для двух змеек и еды.
 */
 
 #include <stdio.h>
@@ -78,12 +82,13 @@ typedef struct snake_t
     size_t tsize;
     int level;
     int speed;
+    int color;
 } snake_t;
 
 _Bool GameOver = FALSE;
 
 struct snake_t
-init_Snake(int x, int y, size_t tsize)
+init_Snake(int x, int y, size_t tsize, int color)
 {
     struct snake_t snake;
     snake.x = x;
@@ -93,6 +98,7 @@ init_Snake(int x, int y, size_t tsize)
     snake.direction = 1;
     snake.level = 1;
     snake.speed = DELAY;
+    snake.color = color;
 
     for (int i = 0; i < (int)tsize; i++)
     {
@@ -109,6 +115,15 @@ food_t init_Food()
     food.y = rand() % MAX_Y;
     food.hasEaten = 0;
     return food;
+}
+
+void set_Color(snake_t *snake, snake_t *snake2, food_t *food)
+{
+    for (int i = 0; i <= 6; i++)
+    {
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i);
+        printf("%c %c %c", snake[i], snake2[i], food[i]);
+    }
 }
 
 void speedUp(snake_t *snake)
@@ -312,9 +327,11 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
 
 int main(void)
 {
-    struct snake_t snake = init_Snake(10, 5, 2);
-    struct snake_t snake2 = init_Snake(5, 2, 2);
+    struct snake_t snake = init_Snake(10, 5, 2, snake.color);
+    struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
     food_t food = init_Food();
+
+    set_Color(&snake, &snake2, &food);
 
     print_Snake(snake, snake2, food);
 
