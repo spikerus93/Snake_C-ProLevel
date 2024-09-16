@@ -146,7 +146,7 @@ void pause()
     delayGame(PAUSE);
 }
 
-void print_Snake(struct snake_t snake, struct food_t food)
+void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food)
 {
     char matrix[MAX_X][MAX_Y];
 
@@ -156,9 +156,13 @@ void print_Snake(struct snake_t snake, struct food_t food)
 
     matrix[food.x][food.y] = '$';
     matrix[snake.x][snake.y] = '@';
+    matrix[snake.x][snake.y] = '%';
 
     for (int i = 0; i < (int)snake.tsize; ++i)
         matrix[snake.tail[i].x][snake.tail[i].y] = '*';
+
+    for (int i = 0; i < (int)snake.tsize; ++i)
+        matrix[snake.tail[i].x][snake.tail[i].y] = '-';
 
     for (int j = 0; j < MAX_Y; ++j)
     {
@@ -175,7 +179,7 @@ bool isInsideField(int x, int y)
     return x >= 0 && x < MAX_X - 1 && y >= 0 && y < MAX_Y - 1;
 }
 
-void input(snake_t *snake)
+void input(snake_t *snake, snake_t *snake2)
 {
     if (_kbhit())
     {
@@ -185,25 +189,57 @@ void input(snake_t *snake)
         case 'A':
             if (snake->direction == RIGHT)
                 break;
-            snake->direction = LEFT; // Движение влево
+            snake->direction = snake;
+            snake->direction = LEFT; // Движение влево змейкой1
             break;
         case 'd':
         case 'D':
             if (snake->direction == LEFT)
                 break;
-            snake->direction = RIGHT; // Движение вправо
+            snake->direction = snake;
+            snake->direction = RIGHT; // Движение вправо змейкой1
             break;
         case 'w':
         case 'W':
             if (snake->direction == DOWN)
                 break;
-            snake->direction = UP; // Движение вверх
+            snake->direction = snake;
+            snake->direction = UP; // Движение вверх змейкой1
             break;
         case 's':
         case 'S':
             if (snake->direction == UP)
                 break;
-            snake->direction = DOWN; // Движение вниз
+            snake->direction = snake;
+            snake->direction = DOWN; // Движение вниз змейкой1
+            break;
+        case 'j':
+        case 'J':
+            if (snake->direction == RIGHT)
+                break;
+            snake->direction = snake2;
+            snake->direction = LEFT; // Движение влево змейкой2
+            break;
+        case 'l':
+        case 'L':
+            if (snake->direction == LEFT)
+                break;
+            snake->direction = snake2;
+            snake->direction = RIGHT; // Движение вправо змейкой2
+            break;
+        case 'i':
+        case 'I':
+            if (snake->direction == DOWN)
+                break;
+            snake->direction = snake2;
+            snake->direction = UP; // Движение вверх змейкой2
+            break;
+        case 'k':
+        case 'K':
+            if (snake->direction == UP)
+                break;
+            snake->direction = snake2;
+            snake->direction = DOWN; // Движение вниз змейкой2
             break;
         case 'q':
         case 'Q':
