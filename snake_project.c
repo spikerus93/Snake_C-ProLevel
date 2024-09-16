@@ -256,6 +256,9 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
     if (snake.x == MAX_X)
         snake.x = 0;
 
+    if (snake.y == MAX_Y)
+        snake.y = 0;
+
     if (snake.y < 0)
         snake.x = MAX_Y - 1;
 
