@@ -156,13 +156,13 @@ void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food
 
     matrix[food.x][food.y] = '$';
     matrix[snake.x][snake.y] = '@';
-    matrix[snake.x][snake.y] = '%';
+    matrix[snake2.x][snake2.y] = '%';
 
     for (int i = 0; i < (int)snake.tsize; ++i)
         matrix[snake.tail[i].x][snake.tail[i].y] = '*';
 
-    for (int i = 0; i < (int)snake.tsize; ++i)
-        matrix[snake.tail[i].x][snake.tail[i].y] = '-';
+    for (int i = 0; i < (int)snake2.tsize; ++i)
+        matrix[snake2.tail[i].x][snake2.tail[i].y] = '-';
 
     for (int j = 0; j < MAX_Y; ++j)
     {
@@ -172,11 +172,6 @@ void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food
         }
         printf("\n");
     }
-}
-
-bool isInsideField(int x, int y)
-{
-    return x >= 0 && x < MAX_X - 1 && y >= 0 && y < MAX_Y - 1;
 }
 
 void input(snake_t *snake, snake_t *snake2)
@@ -189,57 +184,49 @@ void input(snake_t *snake, snake_t *snake2)
         case 'A':
             if (snake->direction == RIGHT)
                 break;
-            snake->direction = snake;
-            snake->direction = LEFT; // Движение влево змейкой1
+            snake->direction = LEFT; // Змейка1 = Движение влево
             break;
         case 'd':
         case 'D':
             if (snake->direction == LEFT)
                 break;
-            snake->direction = snake;
-            snake->direction = RIGHT; // Движение вправо змейкой1
+            snake->direction = RIGHT; // Змейка1 = Движение вправо
             break;
         case 'w':
         case 'W':
             if (snake->direction == DOWN)
                 break;
-            snake->direction = snake;
-            snake->direction = UP; // Движение вверх змейкой1
+            snake->direction = UP; // Змейка1 = Движение вверх
             break;
         case 's':
         case 'S':
             if (snake->direction == UP)
                 break;
-            snake->direction = snake;
-            snake->direction = DOWN; // Движение вниз змейкой1
+            snake->direction = DOWN; // Змейка1 = Движение вниз
             break;
         case 'j':
         case 'J':
-            if (snake->direction == RIGHT)
+            if (snake2->direction == RIGHT)
                 break;
-            snake->direction = snake2;
-            snake->direction = LEFT; // Движение влево змейкой2
+            snake2->direction = LEFT; // Змейка2 = Движение влево
             break;
         case 'l':
         case 'L':
-            if (snake->direction == LEFT)
+            if (snake2->direction == LEFT)
                 break;
-            snake->direction = snake2;
-            snake->direction = RIGHT; // Движение вправо змейкой2
+            snake2->direction = RIGHT; // Змейка2 = Движение вправо
             break;
         case 'i':
         case 'I':
-            if (snake->direction == DOWN)
+            if (snake2->direction == DOWN)
                 break;
-            snake->direction = snake2;
-            snake->direction = UP; // Движение вверх змейкой2
+            snake2->direction = UP; // Змейка2 = Движение вверх
             break;
         case 'k':
         case 'K':
-            if (snake->direction == UP)
+            if (snake2->direction == UP)
                 break;
-            snake->direction = snake2;
-            snake->direction = DOWN; // Движение вниз змейкой2
+            snake2->direction = DOWN; // Змейка2 = Движение вниз
             break;
         case 'q':
         case 'Q':
@@ -254,22 +241,27 @@ void input(snake_t *snake, snake_t *snake2)
     }
 }
 
-_Bool isSnakeInTail(snake_t snake)
+bool isInsideField(int x, int y)
 {
-    for (size_t i = 0; i < snake.tsize; i++)
+    return x >= 0 || x < MAX_X - 1 || y >= 0 || y < MAX_Y - 1;
+}
+
+_Bool isSnakeInTail(snake_t *snake)
+{
+    for (size_t i = 1; i < snake->tsize; i++)
     {
-        if (snake.x == snake.tail[i].x || snake.y == snake.tail[i].y)
-            return 0;
+        if (snake->x == snake->tail[i].x && snake->y == snake->tail[i].y)
+            return 1;
     }
-    return 1;
+    return 0;
 }
 
 int checkDirection(snake_t *snake, const int32_t key)
 {
-    if ((snake->direction == LEFT && (key == 'd' || key == 'D')) ||
-        (snake->direction == RIGHT && (key == 'a' || key == 'A')) ||
-        (snake->direction == UP && (key == 's' || key == 'S')) ||
-        (snake->direction == DOWN && (key == 'w' || key == 'W')))
+    if ((snake->direction == LEFT && (key == 'd' || key == 'D') && (key == 'l' || key == 'L')) ||
+        (snake->direction == RIGHT && (key == 'a' || key == 'A') && (key == 'j' || key == 'J')) ||
+        (snake->direction == UP && (key == 's' || key == 'S') && (key == 'k' || key == 'K')) ||
+        (snake->direction == DOWN && (key == 'w' || key == 'W') && (key == 'i' || key == 'I')))
     {
         return 0;
     }
@@ -321,15 +313,19 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
 int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 2);
+    struct snake_t snake2 = init_Snake(5, 2, 2);
     food_t food = init_Food();
-    print_Snake(snake, food);
+
+    print_Snake(snake, snake2, food);
 
     int key = snake.direction;
 
     while (!GameOver)
     {
-        input(&snake);
+        input(&snake, &snake2);
+        input(&snake, &snake2);
         snake = movetoEat_Snake(snake, &food);
+        snake2 = movetoEat_Snake(snake2, &food);
         checkDirection(&snake, key);
 
         if (checkDirection(&snake, key) == 0)
@@ -342,7 +338,7 @@ int main(void)
                 food = init_Food();
         }
 
-        if (isSnakeInTail(snake))
+        if (isSnakeInTail(&snake) || !isInsideField(snake.x, snake.y))
         {
             printf("You ate a tail))) Try again now.");
             GameOver = TRUE;
@@ -351,10 +347,11 @@ int main(void)
 
         sleep(0.9);
         system("cls");
-        print_Snake(snake, food);
+        print_Snake(snake, snake2, food);
         delayGame(snake.speed);
     }
     free(snake.tail);
+    free(snake2.tail);
 
     return 0;
 }

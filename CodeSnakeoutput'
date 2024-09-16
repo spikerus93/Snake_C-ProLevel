@@ -1,0 +1,96 @@
+[33mcommit 8a3b6f543049f65c9b3f4915364f90847dc8b255[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mhomework5[m[33m)[m
+Author: master <spikerus93@rambler.ru>
+Date:   Mon Sep 16 13:53:39 2024 +0300
+
+    добавление змейки2 в проект. Настройка управления змейкой2
+
+[33mcommit c496de57de7f7ddda482b1ff6493e6bbe42f3b87[m[33m ([m[1;32mmain[m[33m)[m
+Author: master <spikerus93@rambler.ru>
+Date:   Mon Sep 16 13:16:17 2024 +0300
+
+    merge branch homework3 in main - OK
+
+[33mcommit 1eaeeda0225d41ac26aec97ac56a9791b76cad60[m[33m ([m[1;32mhomework3[m[33m)[m
+Author: master <spikerus93@rambler.ru>
+Date:   Mon Sep 16 13:07:49 2024 +0300
+
+    исправление функций movetoEat, speedUp
+
+[33mcommit a56cebc276048f29eb6acc0e4cc6e82d86b8a290[m
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 14 20:53:30 2024 +0300
+
+    добавление функции печати уровня, набранного общего уровня и увеличение скорости змейка при поедании еды
+
+[33mcommit e09d858b926eba2148400c1074f97244e08be107[m
+Merge: 4833dba 35661d8
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 14 18:05:07 2024 +0300
+
+    merge add_food & main - проверка слияния-ок
+
+[33mcommit 35661d81b40b7d76acffca9004deecef5d5a7327[m[33m ([m[1;32madd_food[m[33m)[m
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 14 17:36:35 2024 +0300
+
+    добавление еды, обновление, поедание еды, рост хвоста
+
+[33mcommit dab9d014c02d151563c9ca0837db8c6c3ecd6ec7[m
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 14 13:43:23 2024 +0300
+
+    редактирования сведений по проекту создания еды
+
+[33mcommit 4833dba43f22aaf8a8d604dcccc35c91584282d9[m
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 14 13:02:40 2024 +0300
+
+    добавление к записи новых файлов
+
+[33mcommit 9cac560d2708a257a0a44448e0b600fbfcaf2cfd[m
+Author: master <spikerus93@rambler.ru>
+Date:   Fri Sep 13 00:39:05 2024 +0300
+
+    Тестирование функции checkDirection -Попытка 3 = Success
+
+[33mcommit 29bb75a27ee2f51bd30539229ddf0d6d2f15ced0[m
+Author: master <spikerus93@rambler.ru>
+Date:   Thu Sep 12 23:44:55 2024 +0300
+
+    Тестирование функции checkDirection -Попытка 2
+
+[33mcommit 23e8e72e5115b20e70320bd2bf3d6c109931659a[m
+Author: master <spikerus93@rambler.ru>
+Date:   Thu Sep 12 23:42:43 2024 +0300
+
+    Тестирование функции checkDirection
+
+[33mcommit c04882eb2910bfa60c1a3d7a19166aee87520d8f[m
+Author: master <spikerus93@rambler.ru>
+Date:   Tue Sep 10 03:08:52 2024 +0300
+
+    обновление описания по заданию
+
+[33mcommit 229553d5a2d013b957b9bcd88f5c59c7a4bfd461[m[33m ([m[1;31morigin/add_food[m[33m)[m
+Author: master <spikerus93@rambler.ru>
+Date:   Tue Sep 10 02:52:16 2024 +0300
+
+    отправка в удаленный репозиторий
+
+[33mcommit 70cdcc451fa7aaf3420c2ae96a52804d6e01859c[m
+Author: master <spikerus93@rambler.ru>
+Date:   Tue Sep 10 02:38:34 2024 +0300
+
+    добавление структуры и функций еды в проект.
+
+[33mcommit 5359f0ab191fae4565f4f2e2799493569da2a4a4[m
+Author: master <spikerus93@rambler.ru>
+Date:   Mon Sep 9 21:03:34 2024 +0300
+
+    внесение изменений в работу программу: int checkDirection(snake_t* snake, int32_t key), input(управление змейкой)
+
+[33mcommit aba3cec304ec5cb90b58fad6fdb93edd39861275[m
+Author: master <spikerus93@rambler.ru>
+Date:   Sat Sep 7 14:36:37 2024 +0300
+
+    Добавление структуры управления змейкой. Новые функции-get_direction, changeirection
