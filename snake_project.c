@@ -26,10 +26,19 @@ D, d Вправо
 Добавляем в программу структуру еды struct food.
 Обновление еды - refreshFood
 
-Добавление цвета
+homework5
 Задача 1. Цвет змеек
 Домашнее задание
 Добавить цвет для двух змеек и еды.
+
+Задание 2. Стартовое меню
+Добавить стартовое меню (приветствие, выбор режима, выбор цвета змейки и т.д.).
+Написать функцию void startMenu().
+
+*Задание 3. Исполняемый файл
+Попробовать внести изменения в исполняемый файл, чтобы в стандартном режиме змейка не погибала при самопересечении.
+Для этого необходимо найти вызов функции isCrush() и поменять вызов на нужное нам возвращаемое значение 0.
+
 */
 
 #include <stdio.h>
@@ -52,6 +61,15 @@ D, d Вправо
 #define PAUSE 1000
 #define SPEED_UP 5
 
+#define AC_RED "\x1b[31m"
+#define AC_GREEN "\x1b[32m"
+#define AC_YELLOW "\x1b[33m"
+#define AC_BLUE "\x1b[34m"
+#define AC_MAGENTA "\x1b[35m"
+#define AC_CYAN "\x1b[36m"
+#define AC_WHITE "\x1b[37m"
+#define AC_NORMAL "\x1b[m"
+
 enum
 {
     LEFT = 1,
@@ -61,6 +79,18 @@ enum
     STOP_GAME = VK_F10,
     CONTROLS = 3
 };
+
+/* TO DO Сделать выбор полноценным:
+Логика классического режима игры (MODE_CLASSIC) включает управление движением змеи, проверку столкновений с границами или хвостом, обновление игровой области и добавление новых частей змеи при поедании еды.
+Временной режим игры (MODE_TIME) аналогично работает, но включает таймер, который отслеживает, сколько времени игрок провел в игре.
+*/
+
+enum
+{
+    MODE_CLASSIC,
+    MODE_TIME
+};
+char *modes[] = {"Classic_Mode", "Time_Mode"};
 
 typedef struct tail_t
 {
@@ -89,7 +119,7 @@ typedef struct snake_t
 _Bool GameOver = FALSE;
 
 struct snake_t
-init_Snake(int x, int y, size_t tsize)
+init_Snake(int x, int y, size_t tsize, int color)
 {
     struct snake_t snake;
     snake.x = x;
@@ -99,6 +129,7 @@ init_Snake(int x, int y, size_t tsize)
     snake.direction = 1;
     snake.level = 1;
     snake.speed = DELAY;
+    snake.color = color;
 
     for (int i = 0; i < (int)tsize; i++)
     {
@@ -108,22 +139,106 @@ init_Snake(int x, int y, size_t tsize)
     return snake;
 }
 
-food_t init_Food()
+struct food_t init_Food(int color)
 {
-    food_t food;
+    struct food_t food;
     food.x = rand() % MAX_X;
     food.y = rand() % MAX_Y;
     food.hasEaten = 0;
+    food.color = color;
     return food;
 }
 
-void set_Color(snake_t *snake)
+void startMenu()
 {
-    snake = snake->color;
-    for (int i = 0; i <= 6; i++)
+    snake_t snake;
+    snake_t snake2;
+    food_t food;
+
+    printf("Welcome to Snake Game!\n");
+    printf("Please choose a mode:\n");
+    for (int i = 0; i < sizeof(modes) / sizeof(modes[0]); i++)
     {
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i);
+        printf("%d. %s\n", i + 1, modes[i]);
     }
+
+    int choice;
+    do
+    {
+        printf("Your choice: ");
+        scanf("%d", &choice);
+        if (choice < 1 || choice > 2)
+        {
+            printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice < 1 || choice > 2);
+
+    switch (choice)
+    {
+    case 1:
+        printf("Playing in Classic Mode...\n");
+        break;
+    case 2:
+        printf("Playing in Time Mode...\n");
+        break;
+    }
+
+    printf("Choose a color for your snakes and food:\n");
+    int colorChoice;
+    do
+    {
+        printf("Color: ");
+        scanf("%d", &colorChoice);
+        if (colorChoice < 1 || colorChoice > 8)
+        {
+            printf("Invalid color. Please try again.\n");
+        }
+    } while (colorChoice > 1 || colorChoice <= 8);
+
+    switch (colorChoice)
+    {
+    case 1:
+        printf("%s\n", AC_RED);
+        break;
+    case 2:
+        printf("%s\n", AC_GREEN);
+        break;
+    case 3:
+        printf("%s\n", AC_YELLOW);
+        break;
+    case 4:
+        printf("%s\n", AC_BLUE);
+        break;
+    case 5:
+        printf("%s\n", AC_MAGENTA);
+        break;
+    case 6:
+        printf("%s\n", AC_CYAN);
+        break;
+    case 7:
+        printf("%s\n", AC_WHITE);
+        break;
+    case 8:
+        printf("%s\n", AC_NORMAL);
+        break;
+    }
+
+    printf("Starting game with color %d.\n", colorChoice);
+}
+
+void set_Color_snake(snake_t *snake)
+{
+    printf("\033[0;34m", snake);
+}
+
+void set_Color_snake2(snake_t *snake2)
+{
+    printf("\033[0;35m", snake2);
+}
+
+void set_Color_food(food_t *food)
+{
+    printf("\033[0;36m", food);
 }
 
 void printLevel(snake_t *snake)
@@ -327,15 +442,20 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
 
 int main(void)
 {
-    struct snake_t snake = init_Snake(10, 5, 2);
-    struct snake_t snake2 = init_Snake(5, 2, 2);
-    food_t food = init_Food();
+    struct snake_t snake = init_Snake(10, 5, 2, snake.color);
+    struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
+    food_t food = init_Food(food.color);
 
-    set_Color(&snake);
-    set_Color(&snake2);
-    set_Color(&food);
+    startMenu();
+
+    set_Color_snake(&snake);
+    set_Color_snake2(&snake2);
+    set_Color_food(&food);
 
     print_Snake(snake, snake2, food);
+    printf("\033[0;33m", snake.color);
+    printf("\033[0;34m", snake2.color);
+    printf("\033[0;35m", food.color);
 
     int key = snake.direction;
 
@@ -354,7 +474,7 @@ int main(void)
         else
         {
             if (food.hasEaten)
-                food = init_Food();
+                food = init_Food(snake.color);
         }
 
         if (isSnakeInTail(&snake) || !isInsideField(snake.x, snake.y))
