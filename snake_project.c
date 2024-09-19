@@ -183,62 +183,75 @@ void startMenu()
         break;
     }
 
-    printf("Choose a color for your snakes and food:\n");
+    printf("Choose a color (Num = '1' till '8') for your snakes and food:\n");
+
     int colorChoice;
+    int colorCount = 0;
+    int colorChoice1, colorChoice2, colorChoice3 = 0;
+
     do
     {
         printf("Color: ");
         scanf("%d", &colorChoice);
+
         if (colorChoice < 1 || colorChoice > 8)
-        {
             printf("Invalid color. Please try again.\n");
+        else
+            switch (colorChoice)
+            {
+            case 1:
+                colorCount++;
+                printf("%s\n", AC_RED);
+                break;
+            case 2:
+                printf("%s\n", AC_GREEN);
+                colorCount++;
+                break;
+            case 3:
+                printf("%s\n", AC_YELLOW);
+                colorCount++;
+                break;
+            case 4:
+                printf("%s\n", AC_BLUE);
+                colorCount++;
+                break;
+            case 5:
+                printf("%s\n", AC_MAGENTA);
+                colorCount++;
+                break;
+            case 6:
+                printf("%s\n", AC_CYAN);
+                colorCount++;
+                break;
+            case 7:
+                printf("%s\n", AC_WHITE);
+                colorCount++;
+                break;
+            case 8:
+                printf("%s\n", AC_NORMAL);
+                colorCount++;
+                break;
+            }
+
+        if (colorCount == 1)
+        {
+            colorChoice1 = colorChoice;
+            snake.color = colorChoice1;
         }
-    } while (colorChoice > 1 || colorChoice <= 8);
+        if (colorCount == 2)
+        {
+            colorChoice2 = colorChoice;
+            snake2.color = colorChoice2;
+        }
+        if (colorCount == 3)
+        {
+            colorChoice3 = colorChoice;
+            food.color = colorChoice3;
+        }
 
-    switch (colorChoice)
-    {
-    case 1:
-        printf("%s\n", AC_RED);
-        break;
-    case 2:
-        printf("%s\n", AC_GREEN);
-        break;
-    case 3:
-        printf("%s\n", AC_YELLOW);
-        break;
-    case 4:
-        printf("%s\n", AC_BLUE);
-        break;
-    case 5:
-        printf("%s\n", AC_MAGENTA);
-        break;
-    case 6:
-        printf("%s\n", AC_CYAN);
-        break;
-    case 7:
-        printf("%s\n", AC_WHITE);
-        break;
-    case 8:
-        printf("%s\n", AC_NORMAL);
-        break;
-    }
+    } while (colorCount < 3);
 
-    printf("Starting game with color %d.\n", colorChoice);
-}
-
-void set_Color_snake(snake_t *snake)
-{
-    printf("\033[0;34m", snake);
-}
-
-void set_Color_snake2(snake_t *snake2)
-{
-    printf("\033[0;35m", snake2);
-}
-
-void set_Color_food(food_t *food)
-{
-    printf("\033[0;36m", food);
+    printf("Starting game with color %d, %d, %d\n", colorChoice1, colorChoice2, colorChoice3);
 }
 
 void printLevel(snake_t *snake)
@@ -448,14 +461,7 @@ int main(void)
 
     startMenu();
 
-    set_Color_snake(&snake);
-    set_Color_snake2(&snake2);
-    set_Color_food(&food);
-
     print_Snake(snake, snake2, food);
-    printf("\033[0;33m", snake.color);
-    printf("\033[0;34m", snake2.color);
-    printf("\033[0;35m", food.color);
 
     int key = snake.direction;
 
