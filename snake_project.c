@@ -67,8 +67,6 @@ homework5
 #define AC_BLUE "\x1b[34m"
 #define AC_MAGENTA "\x1b[35m"
 #define AC_CYAN "\x1b[36m"
-#define AC_WHITE "\x1b[37m"
-#define AC_NORMAL "\x1b[m"
 
 enum
 {
@@ -170,6 +168,7 @@ void startMenu()
         if (choice < 1 || choice > 2)
         {
             printf("Invalid choice. Please try again.\n");
+            return;
         }
     } while (choice < 1 || choice > 2);
 
@@ -183,75 +182,61 @@ void startMenu()
         break;
     }
 
-    printf("Choose a color (Num = '1' till '8') for your snakes and food:\n");
+    printf("Choose a color (Num = '1' till '6') for your snakes and food:\n");
 
     int colorChoice;
     int colorCount = 0;
-    int colorChoice1, colorChoice2, colorChoice3 = 0;
+    bool differentColorsFound = false;
 
     do
     {
         printf("Color: ");
         scanf("%d", &colorChoice);
 
-        if (colorChoice < 1 || colorChoice > 8)
+        if (colorChoice < 1 || colorChoice > 6)
             printf("Invalid color. Please try again.\n");
         else
             switch (colorChoice)
             {
             case 1:
-                colorCount++;
                 printf("%s\n", AC_RED);
                 break;
             case 2:
                 printf("%s\n", AC_GREEN);
-                colorCount++;
                 break;
             case 3:
                 printf("%s\n", AC_YELLOW);
-                colorCount++;
                 break;
             case 4:
                 printf("%s\n", AC_BLUE);
-                colorCount++;
                 break;
             case 5:
                 printf("%s\n", AC_MAGENTA);
-                colorCount++;
                 break;
             case 6:
                 printf("%s\n", AC_CYAN);
-                colorCount++;
-                break;
-            case 7:
-                printf("%s\n", AC_WHITE);
-                colorCount++;
-                break;
-            case 8:
-                printf("%s\n", AC_NORMAL);
-                colorCount++;
                 break;
             }
 
-        if (colorCount == 1)
+        if (!differentColorsFound)
         {
-            colorChoice1 = colorChoice;
-            snake.color = colorChoice1;
+            colorCount++;
+            snake.color = colorChoice;
         }
-        if (colorCount == 2)
+        else if (!differentColorsFound)
         {
-            colorChoice2 = colorChoice;
-            snake2.color = colorChoice2;
+            colorCount++;
+            snake2.color = colorChoice;
         }
-        if (colorCount == 3)
+        else
         {
-            colorChoice3 = colorChoice;
-            food.color = colorChoice3;
+            colorCount++;
+            food.color = colorChoice;
+            differentColorsFound = true;
         }
+    } while (colorCount < 3 && !differentColorsFound);
 
-    } while (colorCount < 3);
-
-    printf("Starting game with color %d, %d, %d\n", colorChoice1, colorChoice2, colorChoice3);
+    printf("Starting game with color %d, %d, %d\n", snake.color, snake2.color, food.color);
 }
 
 void printLevel(snake_t *snake)
