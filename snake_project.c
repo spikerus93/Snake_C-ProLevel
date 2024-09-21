@@ -147,18 +147,20 @@ struct food_t init_Food()
     return food;
 }
 
-void printLevel(snake_t *snake, snake_t *snake2, food_t *food)
+void levelUp(snake_t *snake)
 {
-    if (snake->x == food->x && snake->y == food->y)
-    {
-        printf("Snake 1\n");
-        printf("\nLevel UP! = %d", snake->level++);
-    }
+    snake->level += 1;
+}
 
-    else
+void printLevel(snake_t *snake, food_t *food)
+{
+    for (int i = 0; i < 2; i++)
     {
-        printf("Snake 2\n");
-        printf("\nLevel UP! = %d", snake2->level++);
+        if (snake[i].x == food->x && snake[i].y == food->y)
+        {
+            snake[i].level++;
+            printf("Level UP!: %d\n", snake[i].level);
+        }
     }
 }
 
@@ -185,6 +187,17 @@ void delayGame(int ms)
     int startTime = clock();
     while ((clock() - startTime) < ms)
         ;
+}
+
+void updateSnakeAfterEating(snake_t *snake, food_t *food)
+{
+    if (snake->x == food->x && snake->y == food->y)
+    {
+        food->hasEaten = 1;
+        snake->tsize++;
+        speedUp(snake);
+        levelUp(snake);
+    }
 }
 
 void pause()
@@ -436,25 +449,21 @@ snake_t move_Snake(snake_t snake)
     else if (snake.direction == DOWN)
         ++snake.y;
 
-        return snake;
+    return snake;
 }
 
 void competition(snake_t *snake, snake_t *snake2, food_t *food)
 {
     if (snake->x == food->x && snake->y == food->y)
     {
-        food->hasEaten = 1;
-        snake->tsize++;
-        printLevel(snake, snake2, food);
-        speedUp(snake);
+        updateSnakeAfterEating(snake, food);
+        printLevel(snake, food);
     }
 
     if (snake2->x == food->x && snake2->y == food->y)
     {
-        food->hasEaten = 1;
-        snake2->tsize++;
-        printLevel(snake, snake2, food);
-        speedUp(snake2);
+        updateSnakeAfterEating(snake2, food);
+        printLevel(snake, food);
     }
 
     // Определяем победителя на основе длины змеи
@@ -506,11 +515,17 @@ int main(void)
 
     while (!GameOver)
     {
+        srand(time(NULL));
+
         input(&snake, &snake2);
         autoChangeDirection(&snake2, food);
         snake = move_Snake(snake);
         snake2 = move_Snake(snake2);
         competition(&snake, &snake2, &food);
+        updateSnakeAfterEating(&snake, &food);
+        updateSnakeAfterEating(&snake2, &food);
+        printLevel(&snake, &food);
+        printLevel(&snake2, &food);
         checkDirection(&snake, key);
 
         if (food.hasEaten)
