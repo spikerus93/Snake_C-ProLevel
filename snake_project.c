@@ -490,8 +490,64 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
     return snake;
 }
 
+void updateSnakes(snake_t *snake, food_t *food)
+{
+    if (snake->x == food->x && snake->y == food->y)
+    {
+        food->hasEaten = 1;
+        snake->tsize++;
+        speedUp(snake);
+        snake->level++;
+        printLevel(snake);
+    }
+}
+
+void competition(snake_t *snake, snake_t *snake2)
+{
+    // Определяем победителя на основе длины змеи
+    if (snake->tsize > snake2->tsize)
+    {
+        printf("Snake 1 wins!\n");
+    }
+    else if (snake->tsize < snake2->tsize)
+    {
+        printf("Snake 2 wins!\n");
+    }
+    else
+    {
+        // Длины равны, определяем победителя по уровню сложности
+        if (snake->level > snake2->level)
+        {
+            printf("Snake 1 wins!\n");
+        }
+        else if (snake->level < snake2->level)
+        {
+            printf("Snake 2 wins!\n");
+        }
+        else
+        {
+            // Уровни тоже равны, определяем победителя по временному отрезку
+            if (snake->tsize > snake2->tsize)
+            {
+                printf("Snake 1 wins!\n");
+            }
+            else if (snake->tsize < snake2->tsize)
+            {
+                printf("Snake 2 wins!\n");
+            }
+            else
+            {
+                // Все остальные случаи остаются ничьей
+                printf("It's a draw!\n");
+            }
+        }
+    }
+}
+
 int main(void)
 {
+    srand(time(NULL)); // Инициализация генератора случайных чисел
+
     struct snake_t snake = init_Snake(10, 5, 2, snake.color);
     struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
 
@@ -508,7 +564,10 @@ int main(void)
         autoChangeDirection(&snake2, food);
         snake = movetoEat_Snake(snake, &food);
         snake2 = movetoEat_Snake(snake2, &food);
+        updateSnakes(&snake, &food);
+        updateSnakes(&snake2, &food);
         checkDirection(&snake, key);
+        competition(&snake, &snake2);
 
         if (checkDirection(&snake, key) == 0)
         {
