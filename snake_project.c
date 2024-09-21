@@ -55,7 +55,6 @@ homework5
 
 #define START_TAIL_SIZE 2
 #define MAX_TAIL_SIZE 100
-#define SEED_NUMBER 10
 
 #define DELAY 100
 #define PAUSE 1000
@@ -74,13 +73,12 @@ enum
     RIGHT,
     UP,
     DOWN,
-    STOP_GAME = VK_F10,
     CONTROLS = 3
 };
 
 /* TO DO Сделать выбор полноценным:
 Логика классического режима игры (MODE_CLASSIC) включает управление движением змеи, проверку столкновений с границами или хвостом, обновление игровой области и добавление новых частей змеи при поедании еды.
-Временной режим игры (MODE_TIME) аналогично работает, но включает таймер, который отслеживает, сколько времени игрок провел в игре.
+Искусственный интеллект (MODE_AI) аналогично работает, но включает функцию авто-пилот на другую змейку.
 */
 
 enum
@@ -149,14 +147,31 @@ struct food_t init_Food()
     return food;
 }
 
-void printLevel(snake_t *snake)
+void printLevel(snake_t *snake, snake_t *snake2, food_t *food)
 {
-    printf("Level: %d\n", snake->level);
+    if (snake->x == food->x && snake->y == food->y)
+    {
+        printf("Snake 1\n");
+        printf("\nLevel UP! = %d", snake->level++);
+    }
+
+    else
+    {
+        printf("Snake 2\n");
+        printf("\nLevel UP! = %d", snake2->level++);
+    }
 }
 
-void printExit(snake_t *snake)
+void printExit(snake_t *snake, snake_t *snake2)
 {
-    printf("Game Over!\n");
+    if (snake->level > snake2->level)
+    {
+        printf("Snake 1 wins!\n");
+    }
+    else
+    {
+        printf("Snake 2 wins!\n");
+    }
     printf("Final Level: %d\n", snake->level);
 }
 
@@ -223,14 +238,6 @@ void autoChangeDirection(snake_t *snake, food_t food)
         }
         return;
     }
-    if (snake->x == food.x && snake->y == food.y)
-    {
-        food.hasEaten = 1;
-        snake->tsize++;
-        speedUp(snake);
-        snake->level++;
-        printLevel(snake);
-    }
 }
 
 void startMenu()
@@ -240,33 +247,6 @@ void startMenu()
     food_t food;
 
     printf("Welcome to Snake Game!\n");
-    printf("Please choose a mode:\n");
-    for (int i = 0; i < sizeof(modes) / sizeof(modes[0]); i++)
-    {
-        printf("%d. %s\n", i + 1, modes[i]);
-    }
-
-    int choice;
-    do
-    {
-        printf("Your choice: ");
-        scanf("%d", &choice);
-        if (choice < 1 || choice > 2)
-        {
-            printf("Invalid choice. Please try again.\n");
-            return;
-        }
-    } while (choice < 1 || choice > 2);
-
-    switch (choice)
-    {
-    case 1:
-        printf("Playing in Classic Mode...\n");
-        break;
-    case 2:
-        printf("Playing in AI Mode...\n");
-        break;
-    }
 
     printf("Choose a color (Num = '1' till '6') for your snakes and food:\n");
 
@@ -353,7 +333,7 @@ void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food
     }
 }
 
-void input(snake_t *snake /*snake_t *snake2*/)
+void input(snake_t *snake, snake_t *snake2)
 {
     if (_kbhit())
     {
@@ -383,33 +363,11 @@ void input(snake_t *snake /*snake_t *snake2*/)
                 break;
             snake->direction = DOWN; // Змейка1 = Движение вниз
             break;
-        // case 'j':
-        // case 'J':
-        //     if (snake2->direction == RIGHT)
-        //         break;
-        //     snake2->direction = LEFT; // Змейка2 = Движение влево
-        //     break;
-        // case 'l':
-        // case 'L':
-        //     if (snake2->direction == LEFT)
-        //         break;
-        //     snake2->direction = RIGHT; // Змейка2 = Движение вправо
-        //     break;
-        // case 'i':
-        // case 'I':
-        //     if (snake2->direction == DOWN)
-        //         break;
-        //     snake2->direction = UP; // Змейка2 = Движение вверх
-        //     break;
-        // case 'k':
-        // case 'K':
-        //     if (snake2->direction == UP)
-        //         break;
-        //     snake2->direction = DOWN; // Змейка2 = Движение вниз
-        //     break;
+
         case 'q':
         case 'Q':
-            printExit(snake);
+            printf("\nYou are out of the game!\n");
+            printExit(snake, snake2);
             exit(EXIT_SUCCESS);
             break;
         case 'p':
@@ -447,7 +405,7 @@ int checkDirection(snake_t *snake, const int32_t key)
     return 1;
 }
 
-snake_t movetoEat_Snake(snake_t snake, food_t *food)
+snake_t move_Snake(snake_t snake)
 {
 
     for (int i = snake.tsize; i > 0; i--)
@@ -478,38 +436,33 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
     else if (snake.direction == DOWN)
         ++snake.y;
 
-    if (snake.x == food->x && snake.y == food->y)
-    {
-        food->hasEaten = 1;
-        snake.tsize++;
-        speedUp(&snake);
-        snake.level++;
-        printLevel(&snake);
-    }
-
-    return snake;
+        return snake;
 }
 
-void updateSnakes(snake_t *snake, food_t *food)
+void competition(snake_t *snake, snake_t *snake2, food_t *food)
 {
     if (snake->x == food->x && snake->y == food->y)
     {
         food->hasEaten = 1;
         snake->tsize++;
+        printLevel(snake, snake2, food);
         speedUp(snake);
-        snake->level++;
-        printLevel(snake);
     }
-}
 
-void competition(snake_t *snake, snake_t *snake2)
-{
+    if (snake2->x == food->x && snake2->y == food->y)
+    {
+        food->hasEaten = 1;
+        snake2->tsize++;
+        printLevel(snake, snake2, food);
+        speedUp(snake2);
+    }
+
     // Определяем победителя на основе длины змеи
-    if (snake->tsize > snake2->tsize)
+    if (snake->tsize > snake2->tsize || snake->tsize == MAX_TAIL_SIZE)
     {
         printf("Snake 1 wins!\n");
     }
-    else if (snake->tsize < snake2->tsize)
+    else if (snake2->tsize > snake->tsize || snake2->tsize == MAX_TAIL_SIZE)
     {
         printf("Snake 2 wins!\n");
     }
@@ -519,26 +472,20 @@ void competition(snake_t *snake, snake_t *snake2)
         if (snake->level > snake2->level)
         {
             printf("Snake 1 wins!\n");
+            printExit(snake, snake2);
         }
-        else if (snake->level < snake2->level)
+        else if (snake2->level > snake->level)
         {
             printf("Snake 2 wins!\n");
+            printExit(snake, snake2);
         }
-        else
+        else if (GameOver)
         {
-            // Уровни тоже равны, определяем победителя по временному отрезку
-            if (snake->tsize > snake2->tsize)
-            {
-                printf("Snake 1 wins!\n");
-            }
-            else if (snake->tsize < snake2->tsize)
-            {
-                printf("Snake 2 wins!\n");
-            }
-            else
+            if ((snake->tsize == snake2->tsize) || snake->level == snake2->level)
             {
                 // Все остальные случаи остаются ничьей
                 printf("It's a draw!\n");
+                printExit(snake, snake2);
             }
         }
     }
@@ -546,7 +493,6 @@ void competition(snake_t *snake, snake_t *snake2)
 
 int main(void)
 {
-    srand(time(NULL)); // Инициализация генератора случайных чисел
 
     struct snake_t snake = init_Snake(10, 5, 2, snake.color);
     struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
@@ -560,35 +506,25 @@ int main(void)
 
     while (!GameOver)
     {
-        input(&snake);
+        input(&snake, &snake2);
         autoChangeDirection(&snake2, food);
-        snake = movetoEat_Snake(snake, &food);
-        snake2 = movetoEat_Snake(snake2, &food);
-        updateSnakes(&snake, &food);
-        updateSnakes(&snake2, &food);
+        snake = move_Snake(snake);
+        snake2 = move_Snake(snake2);
+        competition(&snake, &snake2, &food);
         checkDirection(&snake, key);
-        competition(&snake, &snake2);
 
-        if (checkDirection(&snake, key) == 0)
+        if (food.hasEaten)
         {
-            return 0;
-        }
-        else
-        {
-            if (food.hasEaten)
-            {
-                food = init_Food();
-            }
+            food = init_Food();
         }
 
-        if (isSnakeInTail(&snake) || !isInsideField(snake.x, snake.y))
+        if (isSnakeInTail(&snake) && isSnakeInTail(&snake2) && !isInsideField(snake.x, snake.y) && !isInsideField(snake2.x, snake2.y))
         {
             printf("You ate a tail))) Try again now.");
             GameOver = TRUE;
             break;
         }
-
-        sleep(0.9);
+        sleep(0.95);
         system("cls");
         print_Snake(snake, snake2, food);
         delayGame(snake.speed);
