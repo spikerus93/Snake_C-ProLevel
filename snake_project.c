@@ -35,9 +35,7 @@ homework5
 Добавить стартовое меню (приветствие, выбор режима, выбор цвета змейки и т.д.).
 Написать функцию void startMenu().
 
-*Задание 3. Исполняемый файл
-Попробовать внести изменения в исполняемый файл, чтобы в стандартном режиме змейка не погибала при самопересечении.
-Для этого необходимо найти вызов функции isCrush() и поменять вызов на нужное нам возвращаемое значение 0.
+
 
 */
 
@@ -259,8 +257,8 @@ void startMenu()
     snake_t snake2;
     food_t food;
 
-    printf("Welcome to Snake Game!\n");
-
+    printf("\n\nWelcome to Snake Game!\n\n");
+    printf("If you want to quit from the game, please press key 'q' or 'Q'\n\n");
     printf("Choose a color (Num = '1' till '6') for your snakes and food:\n");
 
     int colorChoice;
@@ -522,10 +520,6 @@ int main(void)
         snake = move_Snake(snake);
         snake2 = move_Snake(snake2);
         competition(&snake, &snake2, &food);
-        updateSnakeAfterEating(&snake, &food);
-        updateSnakeAfterEating(&snake2, &food);
-        printLevel(&snake, &food);
-        printLevel(&snake2, &food);
         checkDirection(&snake, key);
 
         if (food.hasEaten)
