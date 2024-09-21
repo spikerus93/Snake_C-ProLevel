@@ -52,10 +52,10 @@ homework5
 
 #define MAX_X 15
 #define MAX_Y 15
-#define MIN_Y 2
 
 #define START_TAIL_SIZE 2
 #define MAX_TAIL_SIZE 100
+#define SEED_NUMBER 10
 
 #define DELAY 100
 #define PAUSE 1000
@@ -86,9 +86,9 @@ enum
 enum
 {
     MODE_CLASSIC,
-    MODE_TIME
+    MODE_AI
 };
-char *modes[] = {"Classic_Mode", "Time_Mode"};
+char *modes[] = {"Classic_Mode", "AI_Mode"};
 
 typedef struct tail_t
 {
@@ -137,14 +137,100 @@ init_Snake(int x, int y, size_t tsize, int color)
     return snake;
 }
 
-struct food_t init_Food(int color)
+struct food_t init_Food()
 {
     struct food_t food;
+
     food.x = rand() % MAX_X;
     food.y = rand() % MAX_Y;
+
     food.hasEaten = 0;
-    food.color = color;
+
     return food;
+}
+
+void printLevel(snake_t *snake)
+{
+    printf("Level: %d\n", snake->level);
+}
+
+void printExit(snake_t *snake)
+{
+    printf("Game Over!\n");
+    printf("Final Level: %d\n", snake->level);
+}
+
+void speedUp(snake_t *snake)
+{
+    snake->speed -= SPEED_UP;
+}
+
+void delayGame(int ms)
+{
+    int startTime = clock();
+    while ((clock() - startTime) < ms)
+        ;
+}
+
+void pause()
+{
+    int ch;
+
+    do
+    {
+        ch = _getch();
+    } while (ch != 'p' && ch != 'P');
+    printf("PAUSE\n");
+    delayGame(PAUSE);
+}
+
+void autoChangeDirection(snake_t *snake, food_t food)
+{
+    if ((snake->direction == LEFT || snake->direction == RIGHT) && snake->y == food.y)
+        return;
+
+    if ((snake->direction == LEFT || snake->direction == RIGHT) && snake->y != food.y)
+    {
+        if (food.x == snake->x)
+        {
+            if (abs(food.y - snake->y) <= MAX_Y / 2)
+            {
+                snake->direction = food.y - snake->y > 0 ? UP : DOWN;
+            }
+            else
+            {
+                snake->direction = food.y - snake->y > 0 ? DOWN : UP;
+            }
+        }
+        return;
+    }
+
+    if ((snake->direction == UP || snake->direction == DOWN) && snake->x == food.x)
+        return;
+
+    if ((snake->direction == UP || snake->direction == DOWN) && snake->x != food.x)
+    {
+        if (snake->y == food.y)
+        {
+            if (abs(food.x - snake->x) <= MAX_X / 2)
+            {
+                snake->direction = food.x - snake->x > 0 ? RIGHT : LEFT;
+            }
+            else
+            {
+                snake->direction = food.x - snake->x > 0 ? LEFT : RIGHT;
+            }
+        }
+        return;
+    }
+    if (snake->x == food.x && snake->y == food.y)
+    {
+        food.hasEaten = 1;
+        snake->tsize++;
+        speedUp(snake);
+        snake->level++;
+        printLevel(snake);
+    }
 }
 
 void startMenu()
@@ -178,7 +264,7 @@ void startMenu()
         printf("Playing in Classic Mode...\n");
         break;
     case 2:
-        printf("Playing in Time Mode...\n");
+        printf("Playing in AI Mode...\n");
         break;
     }
 
@@ -239,41 +325,6 @@ void startMenu()
     printf("Starting game with color %d, %d, %d\n", snake.color, snake2.color, food.color);
 }
 
-void printLevel(snake_t *snake)
-{
-    printf("Level: %d\n", snake->level);
-}
-
-void printExit(snake_t *snake)
-{
-    printf("Game Over!\n");
-    printf("Final Level: %d\n", snake->level);
-}
-
-void speedUp(snake_t *snake)
-{
-    snake->speed -= SPEED_UP;
-}
-
-void delayGame(int ms)
-{
-    int startTime = clock();
-    while ((clock() - startTime) < ms)
-        ;
-}
-
-void pause()
-{
-    int ch;
-
-    do
-    {
-        ch = _getch();
-    } while (ch != 'p' && ch != 'P');
-    printf("PAUSE\n");
-    delayGame(PAUSE);
-}
-
 void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food)
 {
     char matrix[MAX_X][MAX_Y];
@@ -302,7 +353,7 @@ void print_Snake(struct snake_t snake, struct snake_t snake2, struct food_t food
     }
 }
 
-void input(snake_t *snake, snake_t *snake2)
+void input(snake_t *snake /*snake_t *snake2*/)
 {
     if (_kbhit())
     {
@@ -332,30 +383,30 @@ void input(snake_t *snake, snake_t *snake2)
                 break;
             snake->direction = DOWN; // Змейка1 = Движение вниз
             break;
-        case 'j':
-        case 'J':
-            if (snake2->direction == RIGHT)
-                break;
-            snake2->direction = LEFT; // Змейка2 = Движение влево
-            break;
-        case 'l':
-        case 'L':
-            if (snake2->direction == LEFT)
-                break;
-            snake2->direction = RIGHT; // Змейка2 = Движение вправо
-            break;
-        case 'i':
-        case 'I':
-            if (snake2->direction == DOWN)
-                break;
-            snake2->direction = UP; // Змейка2 = Движение вверх
-            break;
-        case 'k':
-        case 'K':
-            if (snake2->direction == UP)
-                break;
-            snake2->direction = DOWN; // Змейка2 = Движение вниз
-            break;
+        // case 'j':
+        // case 'J':
+        //     if (snake2->direction == RIGHT)
+        //         break;
+        //     snake2->direction = LEFT; // Змейка2 = Движение влево
+        //     break;
+        // case 'l':
+        // case 'L':
+        //     if (snake2->direction == LEFT)
+        //         break;
+        //     snake2->direction = RIGHT; // Змейка2 = Движение вправо
+        //     break;
+        // case 'i':
+        // case 'I':
+        //     if (snake2->direction == DOWN)
+        //         break;
+        //     snake2->direction = UP; // Змейка2 = Движение вверх
+        //     break;
+        // case 'k':
+        // case 'K':
+        //     if (snake2->direction == UP)
+        //         break;
+        //     snake2->direction = DOWN; // Змейка2 = Движение вниз
+        //     break;
         case 'q':
         case 'Q':
             printExit(snake);
@@ -399,7 +450,7 @@ int checkDirection(snake_t *snake, const int32_t key)
 snake_t movetoEat_Snake(snake_t snake, food_t *food)
 {
 
-    for (int i = snake.tsize - 1; i > 0; i--)
+    for (int i = snake.tsize; i > 0; i--)
     {
         snake.tail[i] = snake.tail[i - 1];
     }
@@ -416,7 +467,7 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
         snake.y = 0;
 
     if (snake.y < 0)
-        snake.x = MAX_Y - 1;
+        snake.y = MAX_Y - 1;
 
     if (snake.direction == LEFT)
         --snake.x;
@@ -435,6 +486,7 @@ snake_t movetoEat_Snake(snake_t snake, food_t *food)
         snake.level++;
         printLevel(&snake);
     }
+
     return snake;
 }
 
@@ -442,18 +494,18 @@ int main(void)
 {
     struct snake_t snake = init_Snake(10, 5, 2, snake.color);
     struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
-    food_t food = init_Food(food.color);
+
+    food_t food = init_Food();
 
     startMenu();
-
     print_Snake(snake, snake2, food);
 
     int key = snake.direction;
 
     while (!GameOver)
     {
-        input(&snake, &snake2);
-        input(&snake, &snake2);
+        input(&snake);
+        autoChangeDirection(&snake2, food);
         snake = movetoEat_Snake(snake, &food);
         snake2 = movetoEat_Snake(snake2, &food);
         checkDirection(&snake, key);
@@ -465,7 +517,9 @@ int main(void)
         else
         {
             if (food.hasEaten)
-                food = init_Food(snake.color);
+            {
+                food = init_Food();
+            }
         }
 
         if (isSnakeInTail(&snake) || !isInsideField(snake.x, snake.y))
