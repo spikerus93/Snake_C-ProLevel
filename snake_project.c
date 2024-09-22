@@ -1,116 +1,4 @@
-/*Змейка
-// Домашнее задание
-// Проблематика: сейчас змейка “наезжает” на свой хвост
-
-Задача 1. Выбор направления
-Написать функцию, которая будет проверять корректность выбранного направления. Змейка
-не может наступать на хвост, поэтому необходимо запретить
-○ перемещение справа-налево (при движении RIGHT нажатие стрелки влево),
-○ перемещение сверху-вниз (при движении UP нажатие стрелки вниз),
-○ перемещение слева-направо (при движении LEFT нажатие стрелки вправо),
-○ перемещение снизу-вверх (при движении DOWN нажатие стрелки вверх).
-Функция должна иметь вид:
-int checkDirection(snake_t* snake, int32_t key).
-Задача 2. Управление WSAD
-Домашнее задание
-Добавить возможность управления змейкой клавишами WSAD (вне зависимости от
-раскладки и регистра).
-Зависимости от регистра в соответствии с таблицей.
-W, w Вверх
-S, s Вниз
-A, a Влево
-D, d Вправо
-
-Структура еды
-Задача 1
-Добавляем в программу структуру еды struct food.
-Обновление еды - refreshFood
-
-homework5
-Задача 1. Цвет змеек
-Домашнее задание
-Добавить цвет для двух змеек и еды.
-
-Задание 2. Стартовое меню
-Добавить стартовое меню (приветствие, выбор режима, выбор цвета змейки и т.д.).
-Написать функцию void startMenu().
-
-
-
-*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <conio.h>
-#include <unistd.h>
-#include <windows.h>
-#include <stdbool.h>
-#include <time.h>
-
-#define MAX_X 15
-#define MAX_Y 15
-
-#define START_TAIL_SIZE 2
-#define MAX_TAIL_SIZE 100
-
-#define DELAY 100
-#define PAUSE 1000
-#define SPEED_UP 5
-
-#define AC_RED "\x1b[31m"
-#define AC_GREEN "\x1b[32m"
-#define AC_YELLOW "\x1b[33m"
-#define AC_BLUE "\x1b[34m"
-#define AC_MAGENTA "\x1b[35m"
-#define AC_CYAN "\x1b[36m"
-
-enum
-{
-    LEFT = 1,
-    RIGHT,
-    UP,
-    DOWN,
-    CONTROLS = 3
-};
-
-/* TO DO Сделать выбор полноценным:
-Логика классического режима игры (MODE_CLASSIC) включает управление движением змеи, проверку столкновений с границами или хвостом, обновление игровой области и добавление новых частей змеи при поедании еды.
-Искусственный интеллект (MODE_AI) аналогично работает, но включает функцию авто-пилот на другую змейку.
-*/
-
-enum
-{
-    MODE_CLASSIC,
-    MODE_AI
-};
-char *modes[] = {"Classic_Mode", "AI_Mode"};
-
-typedef struct tail_t
-{
-    int x, y;
-} tail_t;
-
-typedef struct food_t
-{
-    int x, y;
-    int hasEaten;
-    int color;
-} food_t;
-
-typedef struct snake_t
-{
-    int x, y;
-    int direction;
-    food_t food;
-    struct tail_t *tail;
-    size_t tsize;
-    int level;
-    int speed;
-    int color;
-} snake_t;
-
-_Bool GameOver = FALSE;
+#include <src/utils.c>
 
 struct snake_t
 init_Snake(int x, int y, size_t tsize, int color)
@@ -145,11 +33,6 @@ struct food_t init_Food()
     return food;
 }
 
-void levelUp(snake_t *snake)
-{
-    snake->level += 1;
-}
-
 void printLevel(snake_t *snake, food_t *food)
 {
     for (int i = 0; i < 2; i++)
@@ -173,18 +56,6 @@ void printExit(snake_t *snake, snake_t *snake2)
         printf("Snake 2 wins!\n");
     }
     printf("Final Level: %d\n", snake->level);
-}
-
-void speedUp(snake_t *snake)
-{
-    snake->speed -= SPEED_UP;
-}
-
-void delayGame(int ms)
-{
-    int startTime = clock();
-    while ((clock() - startTime) < ms)
-        ;
 }
 
 void updateSnakeAfterEating(snake_t *snake, food_t *food)
@@ -389,21 +260,6 @@ void input(snake_t *snake, snake_t *snake2)
     }
 }
 
-bool isInsideField(int x, int y)
-{
-    return x >= 0 || x < MAX_X - 1 || y >= 0 || y < MAX_Y - 1;
-}
-
-_Bool isSnakeInTail(snake_t *snake)
-{
-    for (size_t i = 1; i < snake->tsize; i++)
-    {
-        if (snake->x == snake->tail[i].x && snake->y == snake->tail[i].y)
-            return 1;
-    }
-    return 0;
-}
-
 int checkDirection(snake_t *snake, const int32_t key)
 {
     if ((snake->direction == LEFT && (key == 'd' || key == 'D') && (key == 'l' || key == 'L')) ||
@@ -496,50 +352,4 @@ void competition(snake_t *snake, snake_t *snake2, food_t *food)
             }
         }
     }
-}
-
-int main(void)
-{
-
-    struct snake_t snake = init_Snake(10, 5, 2, snake.color);
-    struct snake_t snake2 = init_Snake(5, 2, 2, snake2.color);
-
-    food_t food = init_Food();
-
-    startMenu();
-    print_Snake(snake, snake2, food);
-
-    int key = snake.direction;
-
-    while (!GameOver)
-    {
-        srand(time(NULL));
-
-        input(&snake, &snake2);
-        autoChangeDirection(&snake2, food);
-        snake = move_Snake(snake);
-        snake2 = move_Snake(snake2);
-        competition(&snake, &snake2, &food);
-        checkDirection(&snake, key);
-
-        if (food.hasEaten)
-        {
-            food = init_Food();
-        }
-
-        if (isSnakeInTail(&snake) && isSnakeInTail(&snake2) && !isInsideField(snake.x, snake.y) && !isInsideField(snake2.x, snake2.y))
-        {
-            printf("You ate a tail))) Try again now.");
-            GameOver = TRUE;
-            break;
-        }
-        sleep(0.95);
-        system("cls");
-        print_Snake(snake, snake2, food);
-        delayGame(snake.speed);
-    }
-    free(snake.tail);
-    free(snake2.tail);
-
-    return 0;
 }
