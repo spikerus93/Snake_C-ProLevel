@@ -1,0 +1,15 @@
+CC := gcc
+CFLAGS := -Wall -O2 -std=c99
+SRCS := main.c utils.c
+OBJS := $(SRCS:.c=.o)
+EXECUTABLE := snake
+
+$(EXECUTABLE): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+
+clean:
+	rm -rf $(OBJS) $(EXECUTABLE)
+
+
+.PHONY: clean
